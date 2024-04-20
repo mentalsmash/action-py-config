@@ -42,6 +42,10 @@ inputs:
       - `github`
       - `inputs`
     required: true
+outputs:
+  CLONE_DIR:
+    description: The clone Directory
+    value: ${{ steps.config.outputs.CLONE_DIR }}
 runs:
   using: "composite"
   steps:
