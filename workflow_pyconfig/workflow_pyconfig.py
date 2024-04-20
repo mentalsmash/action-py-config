@@ -50,7 +50,10 @@ def merge_dicts(result: dict, defaults: dict) -> dict:
   return merged
 
 def load_json_input(name: str, val: str) -> tuple:
-  return dict_to_tuple(name, json.loads(val))
+  if val:
+    return dict_to_tuple(name, json.loads(val))
+  else:
+    return tuple()
 
 def write_output(vars: dict[str, bool | str | int | None] | None = None):
   def _output(var: str, val: bool | str | int | None):
