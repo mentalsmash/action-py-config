@@ -49,7 +49,7 @@ def merge_dicts(result: dict, defaults: dict) -> dict:
     merged[k] = r_v
   return merged
 
-def load_json_input(name: str, val: str) -> NamedTuple | tuple:
+def load_json_input(name: str, val: str) -> tuple:
   return dict_to_tuple(name, json.loads(val))
 
 def write_output(vars: dict[str, bool | str | int | None] | None = None):
