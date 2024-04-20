@@ -6,10 +6,6 @@ inputs:
   clone-dir:
     description: |
       Local directory where the repository will be cloned.
-  workflow:
-    description: |
-      Path to a Python module containing the workflow's configuration function.
-    required: true
   github:
     description: |
       A JSON serialization of the `github` context.
