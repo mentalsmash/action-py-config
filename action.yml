@@ -27,16 +27,25 @@ runs:
       id: config
       shell: python
       run: |
+        import json
         import sys
+        import importlib
+        from pathlib import Path
+
+        clone_dir = Path("${{ inputs.clone-dir }}")
+
+        github = json.loads("""\
+          ${{ inputs.github }}
+        """)
+
+        inputs = json.loads("""\
+          ${{ inputs.inputs }}
+        """)
+
+        workflow_name = github["workflow"]
+
         sys.path.insert(0, "${{ inputs.clone-dir }}/scripts")
-        from action_helpers.workflows.${{inputs.workflow}} import configure
+        module = importlib.import_module(
+          f"action_helpers.workflows.{workflow_name}")
 
-        configure(
-          clone_dir="${{ inputs.clone-dir }}",
-          github="""\
-            ${{ inputs.github }}
-          """,
-          inputs="""\
-            ${{ inputs.inputs }}
-          """)
-
+        module.configure(clone_dir=clone_dir, github=github, inputs=inputs)
