@@ -1,11 +1,8 @@
-name: 'Workflow Configuration from Python'
+name: 'Dynamic Workflow Configuration with Python'
 description: |
   Clone the repository, and invoke a Python function to generate
   dynamic configuration settings for a workflow.
 inputs:
-  clone-dir:
-    description: |
-      Local directory where the repository will be cloned.
   github:
     description: |
       A JSON serialization of the `github` context.
@@ -13,12 +10,44 @@ inputs:
   inputs:
     description: |
       A JSON serialization of the `inputs` context.
+  workflow:
+    description: |
+      Optionally, load configuration for the specified workflow.
+  clone-dir:
+    description: |
+      Directory where the repository will be cloned, if not already existing.
+    default: src/repo
+  clone-repo:
+    description: |
+      Whether to clone the repository or not. Set to empty to disable.
+    default: yes
+  config-dir:
+    description: |
+      Directory where the repository's pyconfig is located.
+      Relative to clone_dir.
+    default: .workflow-pyconfig
+  settings:
+    description: |
+      Path to the project's YAML settings file. Relative to clone_dir.
+    default: .workflow-pyconfig/settings.yml
+  outputs:
+    description: |
+      A newline-separated list of output variables.
+
+      Each line should be in the form: `VAR=<context>.<selector>`.
+
+      The context can be one of:
+      - `cfg` (the loaded configuration object)
+      - `env`
+      - `github`
+      - `inputs`
     required: true
 runs:
   using: "composite"
   steps:
     - name: Clone source repository
       uses: actions/checkout@v4
+      if: ${{ inputs.clone-repo }}
       with:
         path: ${{ inputs.clone-dir }}
         submodules: true
@@ -27,25 +56,17 @@ runs:
       id: config
       shell: python
       run: |
-        import json
         import sys
-        import importlib
-        from pathlib import Path
+        import os
+        sys.path.insert(0, os.environ["GITHUB_ACTION_PATH"])
 
-        clone_dir = Path("${{ inputs.clone-dir }}")
+        from workflow_py_config import action
 
-        github = json.loads("""\
-          ${{ inputs.github }}
-        """)
-
-        inputs = json.loads("""\
-          ${{ inputs.inputs }}
-        """)
-
-        workflow_name = github["workflow"]
-
-        sys.path.insert(0, "${{ inputs.clone-dir }}/scripts")
-        module = importlib.import_module(
-          f"action_helpers.workflows.{workflow_name}")
-
-        module.configure(clone_dir=clone_dir, github=github, inputs=inputs)
+        action(
+          github="""${{ inputs.github }}""",
+          inputs="""${{ inputs.inputs }}""",
+          outputs="""${{ inputs.outputs }}""",
+          clone_dir="${{ inputs.clone-dir }}",
+          config_dir="${{ inputs.config-dir }}",
+          settings="${{ inputs.settings }}",
+          workflow="${{ inputs.workflow }}")
