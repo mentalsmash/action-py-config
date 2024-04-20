@@ -150,7 +150,7 @@ def action(
     for line in outputs.splitlines():
       var, val_k = line.split("=")
       ctx_name = val_k[:val_k.index(".")]
-      ctx_select = val_k[len(ctx_name)+2:]
+      ctx_select = val_k[len(ctx_name)+1:]
       ctx = {
         "cfg": cfg,
         "env": os.environ,
