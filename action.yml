@@ -60,7 +60,7 @@ runs:
         import os
         sys.path.insert(0, os.environ["GITHUB_ACTION_PATH"])
 
-        from workflow_py_config import action
+        from workflow_pyconfig import action
 
         action(
           github="""${{ inputs.github }}""",
