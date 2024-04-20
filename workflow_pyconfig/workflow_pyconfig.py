@@ -121,16 +121,15 @@ def action(
   clone_dir = Path(clone_dir)
 
   pyconfig_dir = clone_dir / config_dir
-  if pyconfig_dir.exists():
-    sys.path.insert(0, pyconfig_dir)
+  assert pyconfig_dir.exists()
+  sys.path.insert(0, pyconfig_dir)
 
   cfg_file = clone_dir / settings
-  if cfg_file and cfg_file.exists():
-    cfg_dict = yaml.safe_load(cfg_file.read_text())
-  else:
-    cfg_dict = {}
+  assert cfg_file.exists()
+  cfg_dict = yaml.safe_load(cfg_file.read_text())
 
   settings_file = pyconfig_dir / "settings.py"
+  assert settings_file.exists()
   settings_mod = load_file_module("settings", settings_file)
 
   derived_cfg = settings_mod.settings(
@@ -161,6 +160,7 @@ def action(
 
   if workflow:
     workflow_file = pyconfig_dir / f"workflows/{workflow}.py"
+    assert workflow_file.exists()
     workflow_mod = load_file_module(f"workflows.{workflow}", workflow_file)
     dyn_outputs = workflow_mod.configure(
       clone_dir=clone_dir,
