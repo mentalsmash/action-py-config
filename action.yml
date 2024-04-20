@@ -1,0 +1,46 @@
+name: 'Workflow Configuration from Python'
+description: |
+  Clone the repository, and invoke a Python function to generate
+  dynamic configuration settings for a workflow.
+inputs:
+  clone-dir:
+    description: |
+      Local directory where the repository will be cloned.
+  workflow:
+    description: |
+      Path to a Python module containing the workflow's configuration function.
+    required: true
+  github:
+    description: |
+      A JSON serialization of the `github` context.
+    required: true
+  inputs:
+    description: |
+      A JSON serialization of the `inputs` context.
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Clone source repository
+      uses: actions/checkout@v4
+      with:
+        path: ${{ inputs.clone-dir }}
+        submodules: true
+
+    - name: Generate workflow configuration
+      id: config
+      shell: python
+      run: |
+        import sys
+        sys.path.insert(0, "${{ inputs.clone-dir }}/scripts")
+        from action_helpers.workflows.${{inputs.workflow}} import configure
+
+        configure(
+          clone_dir="${{ inputs.clone-dir }}",
+          github="""\
+            ${{ inputs.github }}
+          """,
+          inputs="""\
+            ${{ inputs.inputs }}
+          """)
+
